@@ -3,6 +3,8 @@ import db from "../database/entity/index.js";
 
 const users = db["User"];
 const Claims = db["Claims"];
+
+// ckeckClaim
 export const approveClaim = async (id) => {
   const Claimtoapprove = await Claims.findOne(
     { where: { id } }
@@ -14,6 +16,31 @@ export const approveClaim = async (id) => {
   }
   return null;
 };
+
+export const ckeckClaim = async (id) => {
+  const Claimtoapprove = await Claims.findOne(
+    { where: { id } }
+
+  );
+  if (Claimtoapprove) {
+    await Claims.update({ status: "checked" }, { where: { id } });
+    return Claimtoapprove;
+  }
+  return null;
+};
+
+export const unckeckClaim = async (id) => {
+  const Claimtoapprove = await Claims.findOne(
+    { where: { id } }
+
+  );
+  if (Claimtoapprove) {
+    await Claims.update({ status: "pending" }, { where: { id } });
+    return Claimtoapprove;
+  }
+  return null;
+};
+
 
 export const rejectClaim = async (id) => {
   const Claimtoapprove = await Claims.findOne(

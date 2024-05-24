@@ -9,6 +9,7 @@ import {
   getallUsers,
   GetUserPassword,
 } from "../services/userService";
+import Email from "../utils/mailer";
 
 import bcrypt from "bcrypt";
 
@@ -41,8 +42,10 @@ export const addCustomer = async (req, res) => {
     req.body.role=role;
      
     const newUser = await createUserCustomer(req.body);
- 
+    newUser.password = '(keek it secreate)';
+    await new Email(newUser).sendAccountAdded();
 
+ 
 
     return res.status(201).json({
       success: true,
@@ -81,10 +84,13 @@ export const addAdmin = async (req, res) => {
 
     // const role='employee'
     req.body.role='employee';
-    const saltRounds = 10; 
-    req.body.password = await bcrypt.hash(req.body.email, saltRounds);
+    const password = `D${Math.random().toString(36).slice(-8)}`;
+    req.body.password = password;
+    console.log(password);
+
     const newUser = await createUserCustomer(req.body);
- 
+    newUser.password = password;
+    await new Email(newUser,null).sendAccountAdded();
 
 
     return res.status(201).json({

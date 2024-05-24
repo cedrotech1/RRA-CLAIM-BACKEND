@@ -18,6 +18,22 @@ export const getUserByEmail = async (email) => {
     throw error;
   }
 };
+export const getUserEmployees = async () => {
+  try {
+    const allUsers = await users.findAll({
+      where: {  role: "employee" },
+      attributes: {
+        exclude: ["password"],
+      },
+    });
+
+    return allUsers;
+
+  } catch (error) {
+    console.error("Error:", error);
+    throw error;
+  }
+};
 
 
 

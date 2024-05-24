@@ -7,7 +7,9 @@ import {
   deleteOneClaimController,
   getOneClaimController,
   pendingController,
-  updateClaimController
+  updateClaimController,
+  ckeckClaimController,
+  unckeckClaimController
 } from "../controllers/ClaimsController";
 import { protect } from "../middlewares/protect";
 const router = express.Router();
@@ -17,6 +19,8 @@ router.get("/", protect, Claims);
 router.get("/pending", protect, pendingController);
 router.get("/one/:id", protect, getOneClaimController);
 router.put("/approve/:id", protect, approveClaimController);
+router.put("/check/:id", protect, ckeckClaimController);
+router.put("/uncheck/:id", protect, unckeckClaimController);
 router.put("/reject/:id", protect, rejectClaimController);
 router.put("/update/:id", protect, updateClaimController);
 export default router;

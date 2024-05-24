@@ -39,8 +39,8 @@ const options = {
                 $ref: "#/components/schemas/User",
               },
               example: {
-                email: "admin@gmail.com",
-                password: "admin",
+                email: "superadmin@gmail.com",
+                password: "1234",
               },
             },
             required: true,
@@ -607,6 +607,74 @@ const options = {
         responses: {
           201: {
             description: "Claim rejected successfully",
+          },
+          400: {
+            description: "Bad request",
+          },
+          401: {
+            description: "Unauthorized",
+          },
+          500: {
+            description: "Something went wrong",
+          },
+        },
+      },
+    },
+    "/api/v1/Claim/check/{id}": {
+      put: {
+        tags: ["Claim"],
+        summary: "Add a check",
+        description: "check Claim",
+        operationId: "checkClaim",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            description: "Claim's id",
+            required: true,
+            schema: {
+              type: "string",
+            },
+          },
+        ],
+      
+        responses: {
+          201: {
+            description: "Claim checked successfully",
+          },
+          400: {
+            description: "Bad request",
+          },
+          401: {
+            description: "Unauthorized",
+          },
+          500: {
+            description: "Something went wrong",
+          },
+        },
+      },
+    },
+    "/api/v1/Claim/uncheck/{id}": {
+      put: {
+        tags: ["Claim"],
+        summary: "uncheck",
+        description: "uncheck Claim",
+        operationId: "uncheckClaim",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            description: "Claim's id",
+            required: true,
+            schema: {
+              type: "string",
+            },
+          },
+        ],
+      
+        responses: {
+          201: {
+            description: "Claim checked successfully",
           },
           400: {
             description: "Bad request",

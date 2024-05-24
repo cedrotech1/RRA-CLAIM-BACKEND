@@ -7,12 +7,13 @@ import {
   approveClaim,
   rejectClaim,
   getone,
-  updateOneclaim
-
-
-
+  updateOneclaim,
+  ckeckClaim,
+  unckeckClaim,
+  
 } from "../services/ClaimsService";
-
+import {getUserEmployees} from "../services/userService";
+import Email from "../utils/mailer";
 
 export const addClaimController = async (req, res) => {
   try {
@@ -22,6 +23,8 @@ export const addClaimController = async (req, res) => {
         message: "Not authorized, you are not  customer",
       });
     }
+
+    let approval = await getUserEmployees();
 
     req.body.userid = req.user.id
     const currentDate = new Date();
@@ -50,14 +53,23 @@ export const addClaimController = async (req, res) => {
     req.body.status = "pending";
 
     const newClaim = await createClaim(req.body);
-    // const book = await pending(req.params.id);
+  
+    const email = new Email(req.user, newClaim);
+    await email.sendClaimConfirmation();
+    // console.log(approval);
+
+    if (approval && approval.length > 0) {
+      approval.forEach(async (user) => {
+        await new Email(user, newClaim).sendClaimNewRequest();
+      });
+    }
+
+
 
     return res.status(201).json({
       success: true,
       message: "new Claim created successfully",
       Claim: newClaim,
-
-
     });
   } catch (error) {
     console.error(error);
@@ -159,9 +171,88 @@ export const approveClaimController = async (req, res) => {
     }
     // req.body.status = "pending";
     const Claim = await approveClaim(req.params.id);
+    // console.log(data);
+
+    const email = new Email(data.ClaimsUser, data);
+    await email.sendClaimApproval();
+
     return res.status(201).json({
       success: true,
       message: "Claim approved successfully",
+      // Claim: Claim,
+
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      error: error.message,
+    });
+  }
+};
+
+
+export const ckeckClaimController = async (req, res) => {
+  try {
+    if (req.user.role !== "employee" && req.user.role !== "superadmin") {
+      return res.status(401).json({
+        success: false,
+        message: "Not authorized, you are not  employee",
+      });
+    }
+
+    const data = await getone(req.params.id);
+    if (!data) {
+      return res.status(404).json({
+        message: "Claim not found",
+      });
+    }
+    // req.body.status = "pending";
+    const Claim = await ckeckClaim(req.params.id);
+
+    const email = new Email(data.ClaimsUser, data);
+    await email.sendClaimCheckedApproval();
+
+    return res.status(201).json({
+      success: true,
+      message: "Claim checked successfully now client can give it to RIB",
+      // Claim: Claim,
+
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      error: error.message,
+    });
+  }
+};
+export const unckeckClaimController = async (req, res) => {
+  try {
+    if (req.user.role !== "employee" && req.user.role !== "superadmin") {
+      return res.status(401).json({
+        success: false,
+        message: "Not authorized, you are not  employee",
+      });
+    }
+
+    const data = await getone(req.params.id);
+    if (!data) {
+      return res.status(404).json({
+        message: "Claim not found",
+      });
+    }
+    // req.body.status = "pending";
+    const Claim = await unckeckClaim(req.params.id);
+
+    const email = new Email(data.ClaimsUser, data);
+    await email.sendClaimUnCheckedRejection();
+
+    return res.status(201).json({
+      success: true,
+      message: "Claim un checked successfully",
       // Claim: Claim,
 
     });
@@ -194,6 +285,10 @@ export const rejectClaimController = async (req, res) => {
  
     req.body.status = "rejected";
     const Claim = await rejectClaim(req.params.id);
+
+    const email = new Email(data.ClaimsUser, data);
+    await email.sendClaimRejection();
+
     return res.status(201).json({
       success: true,
       message: "Claim rejected successfully",
