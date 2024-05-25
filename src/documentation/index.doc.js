@@ -436,6 +436,8 @@ const options = {
         },
       },
     },
+
+
     "/api/v1/Claim/": {
       get: {
         tags: ["Claim"],
@@ -459,6 +461,96 @@ const options = {
           },
         },
       },
+    },
+
+    "/api/v1/Claim/upload/{id}": {
+      "post": {
+        "tags": ["Claim"],
+        "summary": "Upload a PDF for a claim",
+        "description": "Upload a PDF for a claim",
+        "operationId": "addClaimUpload",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            description: "Claim's id",
+            required: true,
+            schema: {
+              type: "string",
+            },
+          },
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "PDF file to upload"
+                  }
+                },
+                "required": ["file"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "File uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "fileUrl": {
+                      "type": "string"
+                    },
+                    "public_id": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "message": "File uploaded successfully",
+                    "fileUrl": "http://res.cloudinary.com/dzl8xve8s/pdf_uploads/sample.pdf",
+                    "public_id": "sample"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "error": "No file uploaded"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Something went wrong"
+          }
+        }
+      }
     },
     "/api/v1/Claim/pending": {
       get: {

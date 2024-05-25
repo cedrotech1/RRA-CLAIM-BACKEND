@@ -14,6 +14,61 @@ import {
 } from "../services/ClaimsService";
 import {getUserEmployees} from "../services/userService";
 import Email from "../utils/mailer";
+import { upload } from '../utils/cloudinaryConfig';
+import imageUploader from "../helper/imageUplouder";
+// import imageUploader from "../helper/imageUploader";
+
+export const uploadPdf = async (req, res) => {
+  try {
+    console.log('Request received for file upload');
+
+    if (req.user.role !== "customer") {
+      return res.status(401).json({
+        success: false,
+        message: "Not authorized, you are not  customer",
+      });
+    }
+    // const { id } = req.params;
+    console.log(req.params.id)
+    // let data = await getone(id);
+    // if (!data) {
+    //   return res.status(404).json({
+    //     message: "Claim not found",
+    //   });
+    // }
+    if (req.files && req.files.file) { // Ensure req.files.file exists
+      console.log('File received:', req.files.file);
+      const image = await imageUploader(req);
+      if (!image || !image.url) {
+      
+        throw new Error('Upload failed or image URL missing');
+      }
+      req.body.file = image.url;
+      console.log(req.params.id,req.body)
+      req.body.status = 'rib-approved';
+      const updatedClaim = await updateOneclaim(req.params.id,req.body);
+
+      return res.status(200).json({
+        success: true,
+        message: "File uploaded successfully",
+        updatedClaim,
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded",
+      });
+    }
+  } catch (error) {
+    console.error('Error during file upload:', error);
+    return res.status(500).json({
+      message: "Something went wrong",
+      error: error.message,
+    });
+  }
+};
+
+
 
 export const addClaimController = async (req, res) => {
   try {

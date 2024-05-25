@@ -9,7 +9,8 @@ import {
   pendingController,
   updateClaimController,
   ckeckClaimController,
-  unckeckClaimController
+  unckeckClaimController,
+  uploadPdf
 } from "../controllers/ClaimsController";
 import { protect } from "../middlewares/protect";
 const router = express.Router();
@@ -23,4 +24,7 @@ router.put("/check/:id", protect, ckeckClaimController);
 router.put("/uncheck/:id", protect, unckeckClaimController);
 router.put("/reject/:id", protect, rejectClaimController);
 router.put("/update/:id", protect, updateClaimController);
+// Add the upload route
+router.post('/upload/:id',protect, uploadPdf);
+
 export default router;

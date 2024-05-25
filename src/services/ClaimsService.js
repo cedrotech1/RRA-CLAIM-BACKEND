@@ -80,14 +80,24 @@ export const updateUser = async (userId, points) => {
   }
 };
 
-export const updateOneclaim = async (id, Claim) => {
-  const claimToUpdate = await Claims.findOne({ where: { id } });
-  if (claimToUpdate) {
-    await Claims.update(claimToUpdate, { where: { id } });
-    return claimToUpdate;
+export const updateOneclaim = async (id, claimData) => {
+  try {
+    const claimToUpdate = await Claims.findOne({ where: { id } });
+    
+    if (!claimToUpdate) {
+      return null;
+    }
+
+    await Claims.update(claimData, { where: { id } });
+    const updatedClaim = await Claims.findOne({ where: { id } });
+
+    return updatedClaim;
+  } catch (error) {
+    console.error('Error updating claim:', error);
+    throw error;
   }
-  return null;
 };
+
 
 
 export const pending = async (id) => {
