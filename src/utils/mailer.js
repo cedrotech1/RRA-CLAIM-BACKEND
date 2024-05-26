@@ -61,6 +61,10 @@ class Email {
       });
   }
 
+  async sendResetPasswordCode() {
+    await this.send("ResetPasswordCode", "Your Reset Password Code ");
+  }
+
   async sendAccountAdded() {
     await this.send("accountAdded", "Your Account on RRA-Claims is Ready");
   }

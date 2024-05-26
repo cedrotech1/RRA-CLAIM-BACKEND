@@ -82,8 +82,9 @@ const options = {
                 phone: "078654325",
                 tinnumber: "29383834",
                 nid: "23838",
-                email: "test@example.com",
+                email: "cedrickhakuzimana@gmail.com",
                 password: "1234",
+                comfirmpassword: "1234",
               
              
               },
@@ -150,6 +151,95 @@ const options = {
       },
     },
 
+    "/api/v1/users/check": {
+      post: {
+        tags: ["Users"],
+        summary: "Get  users user by email by email and send code",
+        description: "Get all users",
+        operationId: "getAllUserscheck",
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/User",
+              },
+              example: {
+                email: "cedrickhakuzimana.com",                    
+              },
+            },
+            required: true,
+          },
+        },
+        responses: {
+          200: {
+            description: "User retrived successfully",
+          },
+          400: {
+            description: "Bad request",
+          },
+          401: {
+            description: "Unauthorized",
+          },
+          404: {
+            description: "User not found",
+          },
+          500: {
+            description: "Something went wrong",
+          },
+        },
+      },
+    },
+
+    "/api/v1/users/code/{email}": {
+      post: {
+        tags: ["Users"],
+        summary: "check code !",
+        description: "checking code send thrugth email",
+        operationId: "code",
+        parameters: [
+          {
+            name: "email",
+            in: "path",
+            description: "User's email",
+            required: true,
+            schema: {
+              type: "string",
+            },
+          },
+        ],
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/User",
+              },
+              example: {
+                code: "10000",                    
+              },
+            },
+            required: true,
+          },
+        },
+        responses: {
+          200: {
+            description: "User retrived successfully",
+          },
+          400: {
+            description: "Bad request",
+          },
+          401: {
+            description: "Unauthorized",
+          },
+          404: {
+            description: "User not found",
+          },
+          500: {
+            description: "Something went wrong",
+          },
+        },
+      },
+    },
+
     "/api/v1/users": {
       get: {
         tags: ["Users"],
@@ -158,7 +248,7 @@ const options = {
         operationId: "getAllUsers",
         responses: {
           200: {
-            description: "User deleted successfully",
+            description: "User retrieved successfully",
           },
           400: {
             description: "Bad request",
@@ -269,6 +359,57 @@ const options = {
         },
       },
     },
+// resetPassword
+"/api/v1/users/resetPassword/{email}": {
+  put: {
+    tags: ["Users"],
+    summary: "reset  user password",
+    description: "reset  user password  !! ",
+    operationId: "reset-passwordr",
+    parameters: [
+      {
+        name: "email",
+        in: "path",
+        description: "User's email",
+        required: true,
+        schema: {
+          type: "string",
+        },
+      },
+    ],
+    requestBody: {
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/User",
+          },
+          example: {
+            newPassword: "newp",
+            confirmPassword: "cpass",
+           
+          },
+        },
+      },
+    },
+    responses: {
+      200: {
+        description: "User password updated  successfully",
+      },
+      400: {
+        description: "Bad request",
+      },
+      401: {
+        description: "Unauthorized",
+      },
+      404: {
+        description: "User not found",
+      },
+      500: {
+        description: "Something went wrong",
+      },
+    },
+  },
+},
 
     "/api/v1/users/changePassword": {
       put: {

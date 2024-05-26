@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import db from "../database/entity/index.js";
 const users = db["User"];
 import Sequelize from "sequelize";
+import { resetPassword } from "../controllers/userController.js";
 
 export const getUserByEmail = async (email) => {
   try {
@@ -18,6 +19,23 @@ export const getUserByEmail = async (email) => {
     throw error;
   }
 };
+
+export const getUserByCode = async (email,code) => {
+  try {
+    const user = await users.findOne(
+      {
+        where: { resetkey: code ,email:email},
+      }
+    );
+
+    return user;
+  } catch (error) {
+    // Handle errors here
+    console.error("Error fetching user:", error);
+    throw error;
+  }
+};
+
 export const getUserEmployees = async () => {
   try {
     const allUsers = await users.findAll({
@@ -81,6 +99,8 @@ export const getUserByPhone = async (phone) => {
 
 
 
+
+
 export const getUsers = async (restaurents, id) => {
   const allUsers = await users.findAll({
     where: {
@@ -112,6 +132,18 @@ export const updateUser = async (id, user) => {
   );
   if (userToUpdate) {
     await users.update(user, { where: { id } });
+    return user;
+  }
+  return null;
+};
+
+export const updateUserCode = async (email, user) => {
+  const userToUpdate = await users.findOne(
+    { where: { email } },
+    { attributes: { exclude: ["password"] } }
+  );
+  if (userToUpdate) {
+    await users.update(user, { where: { email } });
     return user;
   }
   return null;

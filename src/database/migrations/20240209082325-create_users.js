@@ -36,8 +36,12 @@ module.exports = {
         type: Sequelize.STRING,
       },
       businessDescription:{
+        type: Sequelize.TEXT,
+      },
+      resetkey:{
         type: Sequelize.STRING,
       },
+
 
       createdAt: {
         allowNull: false,

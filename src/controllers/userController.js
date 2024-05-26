@@ -8,6 +8,8 @@ import {
   deleteUser,
   getallUsers,
   GetUserPassword,
+  getUserByCode,
+  updateUserCode
 } from "../services/userService";
 import Email from "../utils/mailer";
 
@@ -298,6 +300,193 @@ export const changePassword = async (req, res) => {
     });
   }
 };
+
+export const resetPassword = async (req, res) => {
+  // console.log(req.user.id)
+  const { oldPassword, newPassword, confirmPassword } = req.body;
+  if ( !oldPassword || !newPassword || !confirmPassword) {
+    return res.status(400).json({
+      success: false,
+      message: "Please provide userId, oldPassword, newPassword, and confirmPassword",
+    });
+  }
+
+  try {
+    const user = await GetUserPassword(req.user.id);
+    
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user",
+      });
+    }
+
+    console.log("Retrieved user from database:", user);
+
+    const storedPassword = user || null;
+
+    if (!storedPassword) {
+      return res.status(500).json({
+        success: false,
+        message: "User password not found in the database",
+      });
+    }
+    console.log(user);
+
+    const validPassword = await bcrypt.compare(oldPassword, storedPassword);
+
+    if (!validPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid old password",
+      });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "New password and confirm password do not match",
+      });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    await updateUser(req.user.id, { password: hashedPassword });
+
+    return res.status(200).json({
+      success: true,
+      message: "Password changed successfully",
+    });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const checkEmail = async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({
+      success: false,
+      message: "Please provide your Email",
+    });
+  }
+
+  try {
+    const user = await getUserByEmail(email);
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "There is no account associated with that email",
+      });
+    }
+
+    // Generate a random 6-digit code including time string
+    const timestamp = Date.now().toString().slice(-3); // Get the last 3 digits of the timestamp
+    const randomPart = Math.floor(100 + Math.random() * 900).toString(); // Get a 3-digit random number
+    const code = timestamp + randomPart; // Combine both parts to form a 6-digit code
+
+
+    await new Email(user, null, code).sendResetPasswordCode();
+    const user1 = await updateUserCode(email, {resetkey:code});
+
+    return res.status(200).json({
+      success: true,
+      message: "Code sent to your email successfully",
+    });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const checkCode = async (req, res) => {
+  const { code } = req.body;
+  if (!req.params.email) {
+    return res.status(400).json({
+      success: false,
+      message: "Please provide your Email",
+    });
+  }
+
+  try {
+    const user = await getUserByCode(req.params.email,code);
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "invalid code",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "now you can reset your password",
+    });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const ResetPassword = async (req, res) => {
+
+  const user = await getUserByEmail(req.params.email);
+  if (!user) {
+    return res.status(400).json({
+      success: false,
+      message: "There is no account associated with that email",
+    });
+  }
+  if (!user.resetkey) {
+    return res.status(400).json({
+      success: false,
+      message: "No Reset Code",
+    });
+  }
+  const { newPassword, confirmPassword } = req.body;
+  if ( !newPassword || !confirmPassword) {
+    return res.status(400).json({
+      success: false,
+      message: "Please provide newPassword, and confirmPassword",
+    });
+  }
+
+  try {
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "New password and confirm password do not match",
+      });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    await updateUser(user.id, { password: hashedPassword,resetkey:'' });
+
+    return res.status(200).json({
+      success: true,
+      message: "Password changed successfully, Login",
+    });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+
 
 
 
